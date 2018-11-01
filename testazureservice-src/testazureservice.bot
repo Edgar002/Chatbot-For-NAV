@@ -1,0 +1,50 @@
+{
+  "name": "testazureservice",
+  "padlock": "a4HqW+nMkA8urdV/ECexHg==!qGUNynSLHIMvuh/pmBurujdde+J4MdImOiTW2rmuRW0xWw85WNp2YM4gHfkn/6bt",
+  "version": "2.0",
+  "services": [
+    {
+      "tenantId": "9db862b3-f7ee-4a7f-b05b-2f8ead4f3db2",
+      "subscriptionId": "554a7597-a726-443e-974a-accae4e72fc1",
+      "resourceGroup": "AzureBotService",
+      "serviceName": "testazureservice",
+      "type": "abs",
+      "name": "testazureservice",
+      "id": "1"
+    },
+    {
+      "connectionString": "UYjDEj86TQAPpDJffVHLPg==!YYIlatUxwSrZssDzt/scpKdtMuKh4EH15+K3bcpHEp6sg2ERrGMj7V7CbrAaGJrwEwf31bAVPIDt5vXgSIaj/elvHC6jcAv7o0AO0lNY+IanKm628TywasGbeAygUXikSkgZ3c9+8uLRai/Ww7fiVjSYWhkgmvTP0wZSc9cxzgx8dLA3szrz0ckepCHDmsovvF43WZx8Xaz79nOa/UbjZEvsipXbODLPJaPtaS4h0E4=",
+      "tenantId": "9db862b3-f7ee-4a7f-b05b-2f8ead4f3db2",
+      "subscriptionId": "554a7597-a726-443e-974a-accae4e72fc1",
+      "resourceGroup": "AzureBotService",
+      "serviceName": "testazureservice8d3d",
+      "type": "blob",
+      "id": "2"
+    },
+    {
+      "appId": "",
+      "appPassword": "",
+      "endpoint": "http://localhost:3978/api/messages",
+      "type": "endpoint",
+      "name": "development",
+      "id": "3"
+    },
+    {
+      "appId": "885f16a8-efe3-4fb7-b335-5d88dc84b62c",
+      "appPassword": "C2W7TATSKJP5lqJZHSyuLw==!VRLc1uG9bVFaLx8y3IB8JLBDaFE5YpxoIDJxGD3FZ/o=",
+      "endpoint": "https://testazureservice-8d3d.azurewebsites.net/api/messages",
+      "type": "endpoint",
+      "name": "production",
+      "id": "4"
+    },
+    {
+      "appId": "afcde0c8-ba53-4c15-8048-424e94eb3a14",
+      "authoringKey": "EUdQXn/Zs8UsVNOFYZdjPQ==!z8EGl44oODhLOkG/Dt8rp7vSmnyCih1Tw9U+WZQO/gzJ4onQUXtz0bLFh6FoMzIR",
+      "version": "0.1",
+      "region": "westus",
+      "type": "luis",
+      "name": "BasicBotLuisApplication",
+      "id": "5"
+    }
+  ]
+}
