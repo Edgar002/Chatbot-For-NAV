@@ -29,6 +29,8 @@ const CANCEL_INTENT = 'Cancel';
 const HELP_INTENT = 'Help';
 const NONE_INTENT = 'None';
 const ITEM_INTENT = 'ITEM';
+const OPEN_INTENT = 'OPEN';
+const PURCHASE_INTENT = 'purchase';
 
 // Supported LUIS Entities, defined in ./dialogs/greeting/resources/greeting.lu
 const USER_NAME_ENTITIES = ['userName', 'userName_patternAny'];
@@ -230,40 +232,93 @@ class BasicBot {
         }
 
         if (topIntent === HELP_INTENT) {
-            await dc.context.sendActivity(`Let me try to provide some help.`);
-            await dc.context.sendActivity(`I understand greetings, being asked for help, or being asked to cancel what I am doing.`);
+            const welcomeCard = CardFactory.adaptiveCard(WelcomeCard);
+            await dc.context.sendActivity({ attachments: [welcomeCard] });
             await sql.close();
             return true; // this is an interruption
         }
 
+        if (topIntent === OPEN_INTENT) {
+            var opn = require('opn');
+            await dc.context.sendActivity(`Ok. Please wait`);
+            await dc.context.sendActivity(`Opening Business Central for you.`);
+            opn('http://localhost:8080/bc130');
+            await sql.close();
+            return true; // this is an interruption
+        }
+
+
         if (topIntent === ITEM_INTENT) {
-            
-            if (luisResults.entities['itemNumber']) {
-                let itemNumber = luisResults.entities['itemNumber'][0];
-                console.log(itemNumber);
-                // capitalize and set user name
-                var result = await sql.query("select * from [dbo].[CRONUS International Ltd_$Item] WHERE [No_] = '"+itemNumber+"'");
-                console.log(result);
-                result = result['recordsets'];
-                result = result[0][0];
-                if (result.length !== 0) {
-                    
-                    await dc.context.sendActivity(`Here is the information you need`);
-                    var itemInfo = "Item Number : " + result['No_']+"\n\n";
-                    itemInfo += "Description : " + result['Description'];
-                    await dc.context.sendActivity(itemInfo);
-                    //await dc.context.sendActivity(result);
-                    await sql.close();
-                    return true;
-                }
-                
+            let itemNumber;
+            if (!luisResults.entities['itemNumber_any'] && !luisResults.entities['itemNumber']) {
+                await sql.close();
+                return true;
             }
+            else if (luisResults.entities['itemNumber_any'])
+                itemNumber = luisResults.entities['itemNumber_any'][0];
+            else 
+                itemNumber = luisResults.entities['itemNumber'][0];
+            
+
+            itemNumber = itemNumber.toUpperCase();
+            console.log(itemNumber);
+            // capitalize and set user name
+            var result = await sql.query("select * from [dbo].[CRONUS International Ltd_$Item] WHERE [No_] = '"+itemNumber+"'");
+            console.log(result);
+            result = result['recordsets'];
+            result = result[0][0];
+            if (result) {
+                
+                await dc.context.sendActivity(`Here is the information you need`);
+                var itemInfo = "Item Number : " + result['No_']+"\n\n";
+                itemInfo += "Description : " + result['Description']+"\n\n";
+                itemInfo += "Unit Cost : " + result['Unit Cost'];
+                await dc.context.sendActivity(itemInfo);
+                //await dc.context.sendActivity(result);
+                await sql.close();
+                return true;
+            }
+                
+            
             await dc.context.sendActivity(`Item not found!`);
             const blackGuy = CardFactory.adaptiveCard(BlackGuyImage);
             await dc.context.sendActivity({ attachments: [blackGuy] });
             await sql.close();
             return true; // this is an interruption
         }
+
+        if (topIntent === PURCHASE_INTENT) {
+            
+            if (luisResults.entities['purchaseNumber']) {
+                let purchaseNumber = luisResults.entities['purchaseNumber'][0];
+                purchaseNumber = purchaseNumber.toUpperCase();
+                console.log(purchaseNumber);
+                // capitalize and set user name
+                var result = await sql.query("select * from [dbo].[CRONUS International Ltd_$Purchase Header] WHERE [No_] = '"+purchaseNumber+"'");
+                console.log(result);
+                result = result['recordsets'];
+                result = result[0][0];
+                if (result) {
+                    
+                    await dc.context.sendActivity(`Here is the information you need`);
+                    var poInfo = "Purchase Order Number : " + result['No_']+"\n\n";
+                    poInfo += "Pay-to Name : " + result['Pay-to Name']+"\n\n";
+                    poInfo += "Posting Date : "  + result['Posting Date']+"\n\n";
+                    poInfo += "Due Date : "  + result['Due Date'];
+                    await dc.context.sendActivity(poInfo);
+                    //await dc.context.sendActivity(result);
+                    await sql.close();
+                    return true;
+                }
+                
+            }
+            await dc.context.sendActivity(`Purchase Order not found!`);
+            const blackGuy = CardFactory.adaptiveCard(BlackGuyImage);
+            await dc.context.sendActivity({ attachments: [blackGuy] });
+            await sql.close();
+            return true; // this is an interruption
+        }
+
         await sql.close();
         return false; // this is not an interruption
     }
