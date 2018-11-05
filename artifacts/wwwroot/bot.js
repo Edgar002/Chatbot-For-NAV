@@ -191,29 +191,6 @@ class BasicBot {
      * @param {LuisResults} luisResults - LUIS recognizer results
      */
     async isTurnInterrupted(dc, luisResults) {
-        var sql = require("mssql");
-
-        // config for your database
-        var config = {
-            user: 'sa',
-            password: 'p@ssw0rd',
-            server: 'localhost', 
-            database: 'Demo Database NAV (13-0)',
-            options: {
-                instanceName: '',
-                database: 'Demo Database NAV (13-0)',  //the username above should have granted permissions in order to access this DB.
-                debug: {
-                    packet: false,
-                    payload: false,
-                    token: false,
-                    data: false
-                },
-                encrypt: false
-            } 
-        };
-    
-        // connect to your database
-        await sql.connect(config);
         const topIntent = LuisRecognizer.topIntent(luisResults);
 
         // see if there are anh conversation interrupts we need to handle
@@ -225,46 +202,60 @@ class BasicBot {
             } else {
                 await dc.context.sendActivity(`I don't have anything to cancel.`);
             }
-            await sql.close();
             return true; // this is an interruption
         }
 
         if (topIntent === HELP_INTENT) {
             await dc.context.sendActivity(`Let me try to provide some help.`);
             await dc.context.sendActivity(`I understand greetings, being asked for help, or being asked to cancel what I am doing.`);
-            await sql.close();
             return true; // this is an interruption
         }
 
         if (topIntent === ITEM_INTENT) {
+            var sql = require("mssql");
+
+            // config for your database
+            var config = {
+                user: 'sa',
+                password: 'p@ssw0rd',
+                server: 'localhost', 
+                database: 'Demo Database NAV (13-0)',
+                options: {
+                    instanceName: '',
+                    database: 'Demo Database NAV (13-0)',  //the username above should have granted permissions in order to access this DB.
+                    debug: {
+                        packet: false,
+                        payload: false,
+                        token: false,
+                        data: false
+                    },
+                    encrypt: false
+                } 
+            };
+        
+            // connect to your database
+            sql.connect(config, function (err) {
             
-            if (luisResults.entities['itemNumber']) {
-                let itemNumber = luisResults.entities['itemNumber'][0];
-                console.log(itemNumber);
-                // capitalize and set user name
-                var result = await sql.query("select * from [dbo].[CRONUS International Ltd_$Item] WHERE [No_] = '"+itemNumber+"'");
-                console.log(result);
-                result = result['recordsets'];
-                result = result[0][0];
-                if (result.length !== 0) {
+                if (err) console.log(err);
+        
+                // create Request object
+                var request = new sql.Request();
+                var result = ""; 
+                // query to the database and get the records
+                request.query('select * from [dbo].[CRONUS International Ltd_$Item] WHERE [No_] = 1001', function (err, recordset) {
                     
-                    await dc.context.sendActivity(`Here is the information you need`);
-                    var itemInfo = "Item Number : " + result['No_']+"\n\n";
-                    itemInfo += "Description : " + result['Description'];
-                    await dc.context.sendActivity(itemInfo);
-                    //await dc.context.sendActivity(result);
-                    await sql.close();
-                    return true;
-                }
-                
-            }
-            await dc.context.sendActivity(`Item not found!`);
-            const blackGuy = CardFactory.adaptiveCard(BlackGuyImage);
-            await dc.context.sendActivity({ attachments: [blackGuy] });
-            await sql.close();
+                    if (err) console.log(err)
+        
+                    // send records as a response
+                    result = JSON.stringify(recordset);
+                    //await dc.context.sendActivity(`SQL testing`);
+                    
+                });
+            });
+            await dc.context.sendActivity(`NAV testing`);
+            await dc.context.sendActivity(result);
             return true; // this is an interruption
         }
-        await sql.close();
         return false; // this is not an interruption
     }
 
